@@ -44,5 +44,8 @@ USER node
 #
 # For container platforms requiring external health checks:
 #   1. Set OPENCLAW_GATEWAY_TOKEN or OPENCLAW_GATEWAY_PASSWORD env var
-#   2. Override CMD: ["node","dist/index.js","gateway","--allow-unconfigured","--bind","lan"]
-CMD ["node", "dist/index.js", "gateway", "--allow-unconfigured", "--bind", "lan"]
+#   2. Override CMD: ["node","dist/index.js","gateway","--allow-unconfigured","bind","lan"]
+#
+# Use shell form so we can reference env vars for the port.
+# Railway sets PORT; we also check OPENCLAW_GATEWAY_PORT for explicit override.
+CMD node dist/index.js gateway --allow-unconfigured --bind lan --port ${OPENCLAW_GATEWAY_PORT:-${PORT:-8080}}
