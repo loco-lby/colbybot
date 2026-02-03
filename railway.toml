@@ -6,4 +6,5 @@ healthcheckPath = "/"
 healthcheckTimeout = 300
 
 [variables]
-PORT = "18789"
+PORT = "8080"
+OPENCLAW_GATEWAY_PORT = "8080"
