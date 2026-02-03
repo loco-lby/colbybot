@@ -245,6 +245,14 @@ export function createGatewayHttpServer(opts: {
       return;
     }
 
+    // Simple health check endpoint for container platforms (Railway, Docker, k8s)
+    if (req.url === "/health" && (req.method === "GET" || req.method === "HEAD")) {
+      res.statusCode = 200;
+      res.setHeader("Content-Type", "application/json; charset=utf-8");
+      res.end(JSON.stringify({ ok: true }));
+      return;
+    }
+
     try {
       const configSnapshot = loadConfig();
       const trustedProxies = configSnapshot.gateway?.trustedProxies ?? [];
