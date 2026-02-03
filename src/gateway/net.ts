@@ -152,7 +152,8 @@ export async function resolveGatewayBindHost(
   }
 
   if (mode === "lan") {
-    return "0.0.0.0";
+    // Use :: to listen on both IPv4 and IPv6 (required for Railway v2 and other container platforms)
+    return "::";
   }
 
   if (mode === "custom") {

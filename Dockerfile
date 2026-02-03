@@ -1,7 +1,11 @@
 FROM node:22-bookworm
 
-# Install Bun (required for build scripts)
-RUN curl -fsSL https://bun.sh/install | bash
+# Install Bun (required for build scripts) and gosu for entrypoint user switching
+RUN curl -fsSL https://bun.sh/install | bash && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends gosu && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
 ENV PATH="/root/.bun/bin:${PATH}"
 
 RUN corepack enable
@@ -34,18 +38,19 @@ ENV NODE_ENV=production
 # Allow non-root user to write temp files during runtime/tests.
 RUN chown -R node:node /app
 
-# Security hardening: Run as non-root user
-# The node:22-bookworm image includes a 'node' user (uid 1000)
-# This reduces the attack surface by preventing container escape via root privileges
-USER node
+# Create /data directory for Railway volume mount
+RUN mkdir -p /data && chown -R node:node /data
 
-# Start gateway server with default config.
-# Binds to loopback (127.0.0.1) by default for security.
+# Copy entrypoint script for permission handling
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+ENTRYPOINT ["docker-entrypoint.sh"]
+
+# Start gateway server.
+# Uses shell form so we can reference env vars.
+# Railway sets PORT; SETUP_PASSWORD enables the /setup wizard.
+# OPENCLAW_GATEWAY_TOKEN is optional for API/webhook access.
 #
-# For container platforms requiring external health checks:
-#   1. Set OPENCLAW_GATEWAY_TOKEN or OPENCLAW_GATEWAY_PASSWORD env var
-#   2. Override CMD: ["node","dist/index.js","gateway","--allow-unconfigured","bind","lan"]
-#
-# Use shell form so we can reference env vars for the port.
-# Railway sets PORT; we also check OPENCLAW_GATEWAY_PORT for explicit override.
-CMD node dist/index.js gateway --allow-unconfigured --bind lan --port ${OPENCLAW_GATEWAY_PORT:-${PORT:-8080}}
+# See docs/railway.mdx for full setup instructions.
+CMD ["sh", "-c", "node dist/index.js gateway --allow-unconfigured --bind lan --port ${PORT:-8080}"]
