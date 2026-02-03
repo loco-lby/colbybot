@@ -1,0 +1,9 @@
+[build]
+builder = "dockerfile"
+
+[deploy]
+healthcheckPath = "/"
+healthcheckTimeout = 300
+
+[variables]
+PORT = "18789"
