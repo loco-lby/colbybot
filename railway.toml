@@ -11,3 +11,5 @@ PORT = "8080"
 # Volume mounted at /data for persistent storage
 OPENCLAW_STATE_DIR = "/data/.openclaw"
 OPENCLAW_WORKSPACE_DIR = "/data/workspace"
+# Set OPENCLAW_GATEWAY_TOKEN in Railway dashboard (used for Control UI auth)
+# Connect with: https://<domain>/openclaw?token=<your-token>
